@@ -134,18 +134,42 @@ document.addEventListener("click", e => {
   const st = e.target.closest("[data-studio]");
   if (st && st.closest("#create-menu")) { dd && dd.classList.remove("open"); openWizard(null, st.dataset.studio); return; }
   const g = e.target.closest("[data-go]");
-  if (g) { $$(".dd.open").forEach(d => d.classList.remove("open")); go(g.dataset.go, g.dataset.id); return; }
+  if (g) { $$(".dd.open").forEach(d => d.classList.remove("open")); if (g.dataset.filter) libraryFilter = g.dataset.filter; go(g.dataset.go, g.dataset.id); return; }
   if (e.target.closest("[data-close]")) closeModal();
 });
-document.addEventListener("keydown", e => { if (e.key === "Escape") { closeModal(); if (W) closeWizard(); } });
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") {
+    if (PICKER) return closePicker();
+    if (!$("#modal").classList.contains("hidden")) return closeModal();
+    if (W) return closeWizard();
+    $$(".dd.open").forEach(d => d.classList.remove("open"));
+  }
+  if (e.key === "Tab") {
+    const layer = !$("#modal").classList.contains("hidden") ? $("#modal-card") : W ? $("#wizard") : null;
+    if (layer) {
+      const items = Array.from(layer.querySelectorAll('button:not(:disabled),input:not(:disabled),select:not(:disabled),textarea:not(:disabled),a[href],[tabindex="0"]')).filter(el => el.getClientRects().length && getComputedStyle(el).visibility !== "hidden");
+      const first = items[0], last = items[items.length - 1];
+      if (items.length && (e.shiftKey ? document.activeElement === first || !layer.contains(document.activeElement) : document.activeElement === last || !layer.contains(document.activeElement))) { e.preventDefault(); (e.shiftKey ? last : first).focus(); }
+    }
+  }
+  const target = e.target.closest('[role="button"]');
+  if (target && (e.key === "Enter" || e.key === " ") && !e.target.matches("input,textarea,select")) { e.preventDefault(); target.click(); }
+});
+// Give existing interactive cards the same keyboard access as buttons.
+new MutationObserver(() => {
+  $$("[data-go], .studio, .dd-studio, .tile, .rolecard, .pm, [data-pp], .asset[data-pick], .drop").forEach(el => {
+    if (!el.matches("button,a,input,select")) { el.setAttribute("role", "button"); el.tabIndex = 0; }
+  });
+}).observe(document.body, { childList: true, subtree: true });
 
-function go(name, id) {
+async function go(name, id) {
   if (POLL) { clearInterval(POLL); POLL = null; }
   VIEW = { name, id };
   $$(".navlink").forEach(b => b.classList.toggle("active", b.dataset.go === name));
   window.scrollTo(0, 0);
-  ({ home: viewHome, brands: viewBrands, brand: viewBrand, project: viewProject, video: viewVideo,
-     library: viewLibrary, connections: viewConnections }[name] || viewHome)(id);
+  $("#main").innerHTML = `<div class="loading-state" role="status"><span class="spin"></span> Opening your workspace…</div>`;
+  try { await ({ home: viewHome, brands: viewBrands, brand: viewBrand, project: viewProject, video: viewVideo,
+     library: viewLibrary, connections: viewConnections }[name] || viewHome)(id); } catch (err) { $("#main").innerHTML = `<div class="empty"><h2>Couldn’t load this page</h2><p>${esc(err.message)}</p><button class="btn primary" id="retry-page">Try again</button></div>`; $("#retry-page").onclick = () => go(name, id); }
 }
 
 /* ═════════════ home ═════════════ */
@@ -155,59 +179,25 @@ const studioCard = (i, sel) => `<div class="studio ${sel ? "sel" : ""}" data-stu
   <div class="studio-body"><b>${esc(i.label)}</b><p>${esc(i.blurb)}</p>
     <span class="model-tag">${ic(STUDIO_IC[i.key], "sm")}${esc(i.video_label)}</span></div></div>`;
 
+const needsReview = v => ["plan_review", "images_review", "clips_review", "edit_setup"].includes(v.state);
 async function viewHome() {
   const [{ projects }, { brands }, { videos }] = await Promise.all([api("/api/projects"), api("/api/brands"), api("/api/videos")]);
   const c = ME.connected || {}, missing = [!c.anthropic && "Claude", !c.higgsfield && "Higgsfield"].filter(Boolean);
+  const review = videos.filter(needsReview);
   $("#main").innerHTML = `
-  <section class="hero">
-    <img src="/static/img/hero.jpg" alt="">
-    <div class="hero-body">
-      <span class="kicker">${ic("sparkles", "sm")} AI ad studio</span>
-      <h1>Brief in.<br><span class="grad">Finished ad out.</span></h1>
-      <p>Drop in the assets and the script. ALVION plans every shot, picks the right model for each one,
-         generates it, and cuts the ad — and asks before it spends a single credit.</p>
-      <div class="row"><button class="btn primary lg" id="hero-new">${ic("wand-sparkles")}Create an ad</button>
-        <button class="btn ghost lg" data-go="library">${ic("library")}Open library</button></div>
-    </div>
-    <div class="hero-stats">
-      <div class="float-chip">${ic("gauge")}Picks Kling, Seedance or Veo per shot</div>
-      <div class="float-chip">${ic("shield-check")}Approve images, clips and cost</div>
-      <div class="float-chip">${ic("scissors")}Cuts on measured speech</div>
-    </div>
-  </section>
-
-  ${missing.length ? `<div class="card sec" style="margin-top:18px;border-color:rgba(255,176,32,.35);background:linear-gradient(135deg,rgba(255,176,32,.08),transparent 60%)">
-    <div class="spread"><div class="row">${ic("plug", "lg")}<div><h3>Connect ${missing.join(" and ")}</h3>
-      <p class="muted sm">Until then ALVION runs on a free offline preview so you can try the whole flow.</p></div></div>
-      <button class="btn ghost" data-go="connections">Connect now</button></div></div>` : ""}
-
-  <div class="sec"><div class="sec-head"><div><h2>Studios</h2>
-    <p class="muted sm">Pick what you're making. ALVION chooses the models and tells you why.</p></div></div>
-    <div class="studios">${INTENTS.map(i => studioCard(i)).join("")}</div></div>
-
-  <div class="sec grid g-2">
-    <div class="card"><div class="spread" style="margin-bottom:12px"><h3>Recent projects</h3>
-      <button class="btn quiet sm" id="np">${ic("folder-plus", "sm")}New</button></div>
-      ${projects.length ? `<div class="stack">${projects.slice(0, 5).map(p => `
-        <div class="spread" style="cursor:pointer" data-go="project" data-id="${esc(p.id)}">
-          <div class="row">${ic("folder")}<div><div style="font-weight:700">${esc(p.name)}</div>
-            <div class="muted xs">${esc(p.brand_name || "No brand")} · ${plural(p.video_count, "video")}</div></div></div>
-          <span class="muted xs">${ago(p.created_at)}</span></div>`).join("")}</div>`
-        : `<p class="muted sm">Projects are folders of videos — one campaign, one launch.</p>`}</div>
-    <div class="card"><div class="spread" style="margin-bottom:12px"><h3>Latest videos</h3>
-      <button class="btn quiet sm" data-go="library">${ic("library", "sm")}Library</button></div>
-      ${videos.length ? `<div class="stack">${videos.slice(0, 5).map(v => `
-        <div class="spread" style="cursor:pointer" data-go="video" data-id="${esc(v.id)}">
-          <div class="row">${ic("film")}<div><div style="font-weight:700">${esc(v.title)}</div>
-            <div class="muted xs">${esc(v.project_name || "")}</div></div></div>${pill(v.state)}</div>`).join("")}</div>`
-        : `<p class="muted sm">Nothing yet — pick a studio above.</p>`}</div></div>
-
-  <div class="sec"><div class="sec-head"><h2>Brands</h2><button class="btn quiet sm" data-go="brands">All brands</button></div>
-    <div class="grid g-auto">${brands.map(brandTile).join("")}
-      <div class="tile new" id="nb">${ic("plus", "lg")}New brand</div></div></div>`;
-  $("#hero-new").onclick = () => openWizard(null, null);
+    <div class="dashboard-heading"><div><span class="eyebrow">YOUR CREATIVE WORKSPACE</span><h1>Let’s make something great.</h1><p class="muted">From the first idea to the final cut. All in one studio.</p></div>
+      <button class="btn primary lg" id="hero-new">${ic("plus")}New video</button></div>
+    <section class="studio-banner"><div class="banner-copy"><span class="eyebrow">IDEA. CAMERA. ACTION.</span><h2>Your next great ad<br>starts right here.</h2><p>Bring your idea. Shape every shot.<br>Let ALVION handle the production.</p><button class="btn light" id="banner-new">Start creating ${ic("arrow-right")}</button><span class="banner-note">${ic("shield-check", "sm")} You approve every generation cost</span></div>
+      <div class="banner-art"><img src="/static/img/studio-product.jpg" alt="Product photography inspiration"><div class="art-label">A little idea. A whole production.</div></div></section>
+    <div class="workspace-stats"><div><span class="stat-icon">${ic("film")}</span><b>${videos.length}</b><span>Total videos</span></div><div><span class="stat-icon">${ic("check")}</span><b>${videos.filter(v => v.state === "completed").length}</b><span>Ready to export</span></div><button data-go="library" data-filter="review"><span class="stat-icon">${ic("eye")}</span><b>${review.length}</b><span>Awaiting your review ${ic("arrow-right", "sm")}</span></button><div><span class="stat-icon">${ic("layers")}</span><b>${brands.length}</b><span>Brands</span></div></div>
+    ${missing.length ? `<div class="setup-strip"><span class="setup-icon">${ic("plug")}</span><div><b>You’re exploring in preview mode</b><p>Connect ${missing.join(" and ")} for live AI production. Try the workflow for free first.</p></div><button class="btn ghost sm" data-go="connections">Connect accounts ${ic("arrow-right", "sm")}</button></div>` : ""}
+    <section class="sec"><div class="sec-head"><div><span class="eyebrow">MADE FOR YOUR NEXT IDEA</span><h2>Choose your studio</h2><p class="muted sm">Pick a style. We’ll suggest the right models for every shot.</p></div><span class="muted sm">${INTENTS.length} ways to create</span></div><div class="studios home-studios">${INTENTS.map(i => studioCard(i)).join("")}</div></section>
+    <section class="sec"><div class="sec-head"><div><h2>${review.length ? "Ready for your direction" : "Recent videos"}</h2><p class="muted sm">${review.length ? "Review your shots and keep production moving." : "Pick up where you left off."}</p></div><button class="btn quiet sm" data-go="library">View library ${ic("arrow-right", "sm")}</button></div>
+    ${videos.length ? `<div class="grid g-vid">${(review.length ? review : videos).slice(0, 4).map(vidCard).join("")}</div>` : `<div class="start-empty"><div class="empty-symbol">${ic("clapperboard", "lg")}</div><div><h3>Your first video starts with an idea</h3><p class="muted sm">Choose a studio above. Add a brief, review your shots, and make it yours.</p></div><button class="btn ghost" id="empty-new">Create a video ${ic("arrow-right", "sm")}</button></div>`}</section>
+    <section class="sec"><div class="sec-head"><div><h2>Your projects</h2><p class="muted sm">A home for every campaign, client, and big idea.</p></div><button class="btn quiet sm" id="np">${ic("plus", "sm")}New project</button></div><div class="grid g-auto">${projects.slice(0, 6).map(p => `<button class="project-tile" data-go="project" data-id="${esc(p.id)}">${ic("folder", "lg")}<b>${esc(p.name)}</b><span>${esc(p.brand_name || "Independent project")} · ${plural(p.video_count, "video")}</span>${ic("arrow-right", "sm")}</button>`).join("") || `<div class="muted sm">Projects keep your videos and brand assets together. Create one when you start your first video.</div>`}</div></section>`;
+  $("#hero-new").onclick = $("#banner-new").onclick = () => openWizard(null, null);
+  if ($("#empty-new")) $("#empty-new").onclick = () => openWizard(null, null);
   $("#np").onclick = () => newProjectModal();
-  $("#nb").onclick = () => newBrandModal();
   $$(".studios [data-studio]").forEach(s => s.onclick = () => openWizard(null, s.dataset.studio));
 }
 const brandTile = b => `<div class="tile" data-go="brand" data-id="${esc(b.id)}"><div class="bar"></div>
@@ -296,12 +286,25 @@ async function viewProject(id) {
   const open = () => openWizard(p, null); $("#nv").onclick = open; if ($("#nv2")) $("#nv2").onclick = open;
 }
 
+let libraryFilter = "all";
 async function viewLibrary() {
   const { videos } = await api("/api/videos");
-  $("#main").innerHTML = `<div class="page-head"><div class="grow"><h1>Library</h1>
-    <p>Every video across every brand and project.</p></div></div>
-    ${videos.length ? `<div class="grid g-vid">${videos.map(vidCard).join("")}</div>`
-      : `<div class="empty">${ic("library")}<h3>Your library is empty</h3><p>Videos you make show up here.</p></div>`}`;
+  $("#main").innerHTML = `<div class="page-head"><div class="grow"><span class="eyebrow">YOUR WORK, ALL TOGETHER</span><h1>Video library</h1><p>Find your next edit. Revisit your best work.</p></div><button class="btn primary" id="library-new">${ic("plus")}New video</button></div>
+    <div class="library-toolbar"><label class="search-field"><span class="sr-only">Search videos</span><input type="search" id="video-search" placeholder="Search videos or projects…"></label><div class="filter-tabs" aria-label="Filter videos">${[["all", "All videos"], ["review", "Needs review"], ["progress", "In progress"], ["ready", "Completed"]].map(([k,l]) => `<button data-filter="${k}" aria-pressed="${libraryFilter === k}">${l}</button>`).join("")}</div><label class="sort-field"><span class="sr-only">Sort videos</span><select id="video-sort"><option value="newest">Newest first</option><option value="oldest">Oldest first</option><option value="title">Title A–Z</option></select></label></div><p id="library-count" class="muted sm" aria-live="polite"></p><div id="library-results"></div>`;
+  function renderResults() {
+    const query = $("#video-search").value.trim().toLowerCase();
+    const filtered = videos.filter(v => (libraryFilter === "all" || (libraryFilter === "review" && needsReview(v)) || (libraryFilter === "ready" && v.state === "completed") || (libraryFilter === "progress" && ["draft", "planning", "generating_images", "generating_clips", "rendering"].includes(v.state))) && `${v.title} ${v.project_name || ""}`.toLowerCase().includes(query));
+    const sort = $("#video-sort").value;
+    filtered.sort((a,b) => sort === "title" ? a.title.localeCompare(b.title) : sort === "oldest" ? a.created_at - b.created_at : b.created_at - a.created_at);
+    $("#library-count").textContent = `${filtered.length} of ${plural(videos.length, "video")}`;
+    $("#library-results").innerHTML = filtered.length ? `<div class="grid g-vid">${filtered.map(vidCard).join("")}</div>` : `<div class="empty">${ic("film")}<h3>${videos.length ? "No videos match" : "A blank canvas, for now"}</h3><p>${videos.length ? "Try another search or clear your filters." : "Create your first video to start building your library."}</p><button class="btn ghost" id="library-empty-action">${videos.length ? "Clear filters" : "Create a video"}</button></div>`;
+    if ($("#library-empty-action")) $("#library-empty-action").onclick = () => { if (!videos.length) return openWizard(null, null); libraryFilter = "all"; $("#video-search").value = ""; updateFilters(); renderResults(); };
+  }
+  function updateFilters() { $$(".filter-tabs button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.filter === libraryFilter))); }
+  $$(".filter-tabs button").forEach(b => b.onclick = () => { libraryFilter = b.dataset.filter; updateFilters(); renderResults(); });
+  $("#video-search").oninput = $("#video-sort").onchange = renderResults;
+  $("#library-new").onclick = () => openWizard(null, null);
+  renderResults();
 }
 
 /* ═════════════ connections ═════════════ */
@@ -420,8 +423,9 @@ function claudeKeyModal() {
 }
 
 /* ═════════════ modals ═════════════ */
-function openModal(h) { $("#modal-card").innerHTML = h; $("#modal").classList.remove("hidden"); const f = $("#modal-card input"); f && f.focus(); }
-function closeModal() { $("#modal").classList.add("hidden"); }
+let modalFocus = null;
+function openModal(h) { modalFocus = document.activeElement; $("#modal-card").innerHTML = h; $("#modal").classList.remove("hidden"); const f = $("#modal-card input, #modal-card button"); f && f.focus(); }
+function closeModal() { $("#modal").classList.add("hidden"); if (modalFocus && modalFocus.isConnected) modalFocus.focus(); }
 function confirmSpend({ title, what, amount, rows, live, quote, kind }) {
   return new Promise(resolve => {
     openModal(`<div class="row" style="gap:12px;margin-bottom:6px"><div class="brand-ico">${ic("coins")}</div><h2>${esc(title)}</h2></div>
@@ -490,8 +494,9 @@ async function newProjectModal(brandId, after) {
 }
 
 /* ═════════════ wizard ═════════════ */
-let W = null;
+let W = null, wizardFocus = null;
 async function openWizard(project, kind) {
+  wizardFocus = document.activeElement;
   let full = project && project.id ? await api("/api/projects/" + project.id) : null;
   const projects = full ? [] : (await api("/api/projects")).projects;
   W = { project: full, projects, kind: kind || null, title: "", script: "", mode: "exact",
@@ -500,9 +505,9 @@ async function openWizard(project, kind) {
   W.steps = (full ? [] : ["Project"]).concat(["Studio", "Assets & script", "Models & format"]);
   if (W.kind && !full) W.step = 0;
   else if (W.kind && full) W.step = 1;
-  $("#wizard").classList.remove("hidden"); drawWizard();
+  $("#wizard").classList.remove("hidden"); drawWizard(); $("#wiz-close").focus();
 }
-function closeWizard() { $("#wizard").classList.add("hidden"); W = null; }
+function closeWizard() { $("#wizard").classList.add("hidden"); W = null; if (wizardFocus && wizardFocus.isConnected) wizardFocus.focus(); }
 $("#wiz-close").onclick = closeWizard;
 $("#wiz-back").onclick = () => { if (W.step > 0) { W.step--; drawWizard(); } };
 $("#wiz-next").onclick = () => nextStep();
@@ -513,6 +518,8 @@ function drawWizard() {
     <i>${i < W.step ? "✓" : i + 1}</i>${esc(s)}</div>`).join("");
   $("#wiz-back").style.visibility = W.step ? "visible" : "hidden";
   const last = W.step === W.steps.length - 1;
+  $("#wiz-next").disabled = false;
+  $("#wiz-body").scrollTop = 0;
   $("#wiz-next").innerHTML = last ? `${ic("sparkles")}Plan this ad` : `Continue${ic("arrow-right")}`;
   ({ "Project": wizProject, "Studio": wizStudio, "Assets & script": wizAssets, "Models & format": wizFormat }[stepName()])();
 }
@@ -534,7 +541,7 @@ function wizProject() {
 function wizStudio() {
   $("#wiz-hint").textContent = "This one answer decides the models and the structure.";
   $("#wiz-body").innerHTML = `<div class="wiz-inner"><h1>What are you making?</h1>
-    <p class="muted">ALVION picks the right model for it — you never choose one.</p>
+    <p class="muted">ALVION suggests the right models. You can fine-tune them before production.</p>
     <div class="studios">${INTENTS.map(i => studioCard(i, W.kind === i.key)).join("")}</div></div>`;
   $$("#wiz-body [data-studio]").forEach(s => s.onclick = () => { W.kind = s.dataset.studio; wizStudio(); });
 }

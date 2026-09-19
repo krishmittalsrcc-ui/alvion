@@ -12,6 +12,7 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='26' fill='%23ff5e3a'/><path d='M27 74 50 24l23 50H61L50 50 39 74z' fill='white'/></svg>">
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to workspace</a>
 <div id="sprite"></div>
 
 <!-- ═══════════════ AUTH ═══════════════ -->
@@ -52,7 +53,7 @@
 <div id="app" class="hidden">
   <header class="topbar">
     <div class="logo" data-go="home"><span class="mark"></span>ALVION</div>
-    <nav class="topnav">
+    <nav class="topnav" aria-label="Main navigation">
       <button class="navlink" data-go="home"><svg class="ic"><use href="#i-house"/></svg>Home</button>
       <div class="dd">
         <button class="navlink" id="create-dd"><svg class="ic"><use href="#i-wand-sparkles"/></svg>Create<svg class="ic sm"><use href="#i-chevron-down"/></svg></button>
@@ -66,7 +67,7 @@
       <div class="conn" id="conn"></div>
       <div class="credits" title="Credits spent across all videos"><svg class="ic"><use href="#i-coins"/></svg><span id="credits">0</span></div>
       <div class="dd">
-        <button class="avatar" id="avatar-btn"></button>
+        <button class="avatar" id="avatar-btn" aria-label="Account menu"></button>
         <div class="dd-menu right" id="user-menu">
           <div class="dd-head" id="user-email"></div>
           <button class="dd-item" data-go="connections"><svg class="ic"><use href="#i-settings"/></svg>Settings & keys</button>
@@ -75,11 +76,11 @@
       </div>
     </div>
   </header>
-  <main id="main"></main>
+  <main id="main" tabindex="-1"></main>
 </div>
 
 <!-- ═══════════════ MODAL ═══════════════ -->
-<div id="modal" class="modal hidden"><div class="modal-back" data-close></div><div class="modal-card" id="modal-card"></div></div>
+<div id="modal" class="modal hidden"><div class="modal-back" data-close></div><div class="modal-card" id="modal-card" role="dialog" aria-modal="true" aria-label="Studio dialog"></div></div>
 
 <!-- ═══════════════ WIZARD ═══════════════ -->
 <div id="wizard" class="wizard hidden">
@@ -96,7 +97,7 @@
   </div>
 </div>
 
-<div id="toast" class="toast hidden"></div>
+<div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
 <script src="/static/app.js"></script>
 </body>
 </html>
