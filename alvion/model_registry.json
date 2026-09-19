@@ -1,0 +1,129 @@
+{
+  "_note": "Higgsfield Cloud endpoints (https://api.higgsfield.ai) verified against their published OpenAPI spec, 2026-09-18. `strengths`/`weak` drive alvion/router.py, which picks models so the user never sees a dropdown. Add models in Settings; the catalogue changes.",
+  "image": {
+    "higgsfield-ai/soul/character": {
+      "label": "Soul Character",
+      "params": ["prompt", "aspect_ratio", "resolution", "image_urls"],
+      "credits_per_image": 6.0,
+      "supports_reference": true,
+      "strengths": ["character_consistency", "faces", "people"],
+      "weak": ["text_in_image"],
+      "note": "Holds one person's face and build across a whole campaign."
+    },
+    "higgsfield-ai/soul/reference": {
+      "label": "Soul Reference",
+      "params": ["prompt", "aspect_ratio", "resolution", "image_urls"],
+      "credits_per_image": 5.0,
+      "supports_reference": true,
+      "strengths": ["product_accuracy", "reference_match", "people"],
+      "weak": [],
+      "note": "Matches a supplied product or style reference closely."
+    },
+    "higgsfield-ai/soul/standard": {
+      "label": "Soul",
+      "params": ["prompt", "aspect_ratio", "resolution"],
+      "credits_per_image": 5.0,
+      "supports_reference": false,
+      "strengths": ["people", "lifestyle", "realism"],
+      "weak": ["product_accuracy"],
+      "note": "General photoreal frames when there is no reference to match."
+    },
+    "bytedance/seedream/v4/text-to-image": {
+      "label": "Seedream v4",
+      "params": ["prompt", "aspect_ratio", "resolution", "camera_fixed"],
+      "credits_per_image": 4.0,
+      "supports_reference": false,
+      "strengths": ["scenes", "environments", "cheap", "product"],
+      "weak": ["character_consistency"],
+      "note": "Cheapest solid frame. Good for sets, B-roll and product-on-surface."
+    },
+    "flux-pro/kontext/max/text-to-image": {
+      "label": "FLUX Pro Kontext Max",
+      "params": ["prompt", "aspect_ratio"],
+      "credits_per_image": 6.0,
+      "supports_reference": false,
+      "strengths": ["text_in_image", "graphic", "packaging"],
+      "weak": ["people"],
+      "note": "The one that renders legible type — labels, packaging, signage."
+    }
+  },
+  "video": {
+    "veo3.1/first-last-frame-to-video": {
+      "label": "Veo 3.1 — first + last frame",
+      "params": ["prompt", "first_frame_url", "last_frame_url", "duration", "generate_audio"],
+      "credits_per_second": 4.0,
+      "needs_start_frame": true,
+      "supports_end_frame": true,
+      "native_audio": true,
+      "strengths": ["dialogue", "native_audio", "editing_handles", "controlled_motion"],
+      "weak": ["cost"],
+      "note": "The only model that accepts both a first and a last frame. Pinning the start frame as the end frame is what produces silent beats the edit can cut on."
+    },
+    "veo3.1/image-to-video": {
+      "label": "Veo 3.1",
+      "params": ["prompt", "image_url", "duration", "generate_audio"],
+      "credits_per_second": 4.0,
+      "needs_start_frame": true,
+      "supports_end_frame": false,
+      "native_audio": true,
+      "strengths": ["cinematic", "native_audio", "dialogue", "realism"],
+      "weak": ["cost"],
+      "note": "Cinematic motion with dialogue generated inside the clip."
+    },
+    "veo3.1/fast/image-to-video": {
+      "label": "Veo 3.1 Fast",
+      "params": ["prompt", "image_url", "duration", "generate_audio"],
+      "credits_per_second": 2.0,
+      "needs_start_frame": true,
+      "supports_end_frame": false,
+      "native_audio": true,
+      "strengths": ["cinematic", "native_audio", "cheap"],
+      "weak": ["fine_detail"],
+      "note": "Half the cost of Veo 3.1, still with in-clip audio. Good for drafts."
+    },
+    "kling-video/v2.5-turbo/pro/image-to-video": {
+      "label": "Kling 2.5 Turbo Pro",
+      "params": ["prompt", "image_url", "duration", "negative_prompt", "cfg_scale"],
+      "credits_per_second": 2.0,
+      "needs_start_frame": true,
+      "supports_end_frame": false,
+      "native_audio": false,
+      "strengths": ["avatar", "talking_head", "lip_sync", "human_motion", "ugc"],
+      "weak": ["native_audio"],
+      "note": "Strongest at people: faces hold, body motion is natural, lip movement tracks. The default for avatar and UGC work."
+    },
+    "kling-video/v2.1/master/image-to-video": {
+      "label": "Kling 2.1 Master",
+      "params": ["prompt", "image_url", "duration", "negative_prompt", "cfg_scale"],
+      "credits_per_second": 2.5,
+      "needs_start_frame": true,
+      "supports_end_frame": false,
+      "native_audio": false,
+      "strengths": ["avatar", "human_motion", "prompt_adherence", "detail"],
+      "weak": ["native_audio", "cost"],
+      "note": "Follows a complex motion prompt more literally than Turbo."
+    },
+    "bytedance/seedance/v1/pro/fast/image-to-video": {
+      "label": "Seedance v1 Pro Fast",
+      "params": ["prompt", "image_url", "duration", "resolution", "camera_fixed"],
+      "credits_per_second": 1.5,
+      "needs_start_frame": true,
+      "supports_end_frame": false,
+      "native_audio": false,
+      "strengths": ["dance", "big_motion", "camera_move", "energy", "cheap"],
+      "weak": ["dialogue", "faces"],
+      "note": "Built for movement — dance, transitions, sweeping camera. Cheapest per second."
+    },
+    "bytedance/seedance/v1/lite/image-to-video": {
+      "label": "Seedance v1 Lite",
+      "params": ["prompt", "image_url", "duration", "resolution", "camera_fixed"],
+      "credits_per_second": 1.0,
+      "needs_start_frame": true,
+      "supports_end_frame": false,
+      "native_audio": false,
+      "strengths": ["dance", "big_motion", "cheap"],
+      "weak": ["dialogue", "faces", "fine_detail"],
+      "note": "Draft-tier motion. Use to test a plan before paying for the real thing."
+    }
+  }
+}

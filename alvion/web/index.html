@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ALVION — AI ad studio</title>
+<meta name="description" content="Brief in. Finished ad out. ALVION plans, generates and edits AI video ads.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='26' fill='%23ff5e3a'/><path d='M27 74 50 24l23 50H61L50 50 39 74z' fill='white'/></svg>">
+</head>
+<body>
+<div id="sprite"></div>
+
+<!-- ═══════════════ AUTH ═══════════════ -->
+<section id="auth" class="auth hidden">
+  <div class="auth-art">
+    <div class="collage">
+      <img src="/static/img/auth-1.jpg" alt="">
+      <img src="/static/img/studio-avatar.jpg" alt="">
+      <img src="/static/img/studio-motion.jpg" alt="">
+      <img src="/static/img/auth-3.jpg" alt="">
+      <img src="/static/img/studio-cinematic.jpg" alt="">
+      <img src="/static/img/auth-2.jpg" alt="">
+    </div>
+    <div class="auth-copy">
+      <div class="logo big"><span class="mark"></span>ALVION</div>
+      <h1>Brief in.<br><span class="grad">Finished ad out.</span></h1>
+      <p>Upload the assets, paste the script. ALVION plans every shot, picks the right model for
+        each one, and cuts the ad — stopping for your approval at every step that costs money.</p>
+    </div>
+  </div>
+  <div class="auth-side">
+    <div class="auth-card">
+      <h2 id="auth-title">Welcome back</h2>
+      <p class="muted" id="auth-sub">Sign in to your studio.</p>
+      <form id="auth-form">
+        <label>Email<input type="email" id="auth-email" autocomplete="username" required placeholder="you@studio.com"></label>
+        <label>Password<input type="password" id="auth-password" autocomplete="current-password" required minlength="8" placeholder="At least 8 characters"></label>
+        <button class="btn primary block lg" type="submit" id="auth-submit">Sign in</button>
+      </form>
+      <p class="err" id="auth-err"></p>
+      <p class="muted center sm swap"><span id="auth-swap-text">New to ALVION?</span>
+        <button class="linkbtn" id="auth-swap">Create an account</button></p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ APP ═══════════════ -->
+<div id="app" class="hidden">
+  <header class="topbar">
+    <div class="logo" data-go="home"><span class="mark"></span>ALVION</div>
+    <nav class="topnav">
+      <button class="navlink" data-go="home"><svg class="ic"><use href="#i-house"/></svg>Home</button>
+      <div class="dd">
+        <button class="navlink" id="create-dd"><svg class="ic"><use href="#i-wand-sparkles"/></svg>Create<svg class="ic sm"><use href="#i-chevron-down"/></svg></button>
+        <div class="dd-menu" id="create-menu"></div>
+      </div>
+      <button class="navlink" data-go="library"><svg class="ic"><use href="#i-library"/></svg>Library</button>
+      <button class="navlink" data-go="brands"><svg class="ic"><use href="#i-layers"/></svg>Brands</button>
+      <button class="navlink" data-go="connections"><svg class="ic"><use href="#i-plug"/></svg>Connections</button>
+    </nav>
+    <div class="top-right">
+      <div class="conn" id="conn"></div>
+      <div class="credits" title="Credits spent across all videos"><svg class="ic"><use href="#i-coins"/></svg><span id="credits">0</span></div>
+      <div class="dd">
+        <button class="avatar" id="avatar-btn"></button>
+        <div class="dd-menu right" id="user-menu">
+          <div class="dd-head" id="user-email"></div>
+          <button class="dd-item" data-go="connections"><svg class="ic"><use href="#i-settings"/></svg>Settings & keys</button>
+          <button class="dd-item" id="logout"><svg class="ic"><use href="#i-log-out"/></svg>Sign out</button>
+        </div>
+      </div>
+    </div>
+  </header>
+  <main id="main"></main>
+</div>
+
+<!-- ═══════════════ MODAL ═══════════════ -->
+<div id="modal" class="modal hidden"><div class="modal-back" data-close></div><div class="modal-card" id="modal-card"></div></div>
+
+<!-- ═══════════════ WIZARD ═══════════════ -->
+<div id="wizard" class="wizard hidden">
+  <div class="wiz-top">
+    <div class="logo"><span class="mark"></span>ALVION</div>
+    <div class="wiz-steps" id="wiz-steps"></div>
+    <button class="btn ghost sm" id="wiz-close"><svg class="ic"><use href="#i-x"/></svg>Close</button>
+  </div>
+  <div class="wiz-body" id="wiz-body"></div>
+  <div class="wiz-foot">
+    <button class="btn ghost" id="wiz-back"><svg class="ic"><use href="#i-arrow-left"/></svg>Back</button>
+    <div class="wiz-hint" id="wiz-hint"></div>
+    <button class="btn primary" id="wiz-next">Continue<svg class="ic"><use href="#i-arrow-right"/></svg></button>
+  </div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+<script src="/static/app.js"></script>
+</body>
+</html>

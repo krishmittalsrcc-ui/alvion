@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.DS_Store
+.env
+
+# Runtime state: database, encrypted credentials, master key, all job media.
+data/

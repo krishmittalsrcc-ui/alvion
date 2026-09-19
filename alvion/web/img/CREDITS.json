@@ -1,0 +1,71 @@
+{
+  "license": "Unsplash License \u2014 free for commercial use, no attribution required (https://unsplash.com/license)",
+  "via": "picsum.photos",
+  "images": [
+    {
+      "file": "hero.jpg",
+      "author": "Daniel Robert",
+      "source": "https://unsplash.com/photos/MRxD-J9-4ps"
+    },
+    {
+      "file": "hero2.jpg",
+      "author": "Erez Attias",
+      "source": "https://unsplash.com/photos/KqVHRmHVwwM"
+    },
+    {
+      "file": "studio-avatar.jpg",
+      "author": "Roksolana Zasiadko",
+      "source": "https://unsplash.com/photos/LyeduBb2Auk"
+    },
+    {
+      "file": "studio-ugc.jpg",
+      "author": "Alexander Shustov",
+      "source": "https://unsplash.com/photos/AHBiSKaENwc"
+    },
+    {
+      "file": "studio-product.jpg",
+      "author": "Vee O",
+      "source": "https://unsplash.com/photos/hGO27G5tZJ8"
+    },
+    {
+      "file": "studio-cinematic.jpg",
+      "author": "Jared Erondu",
+      "source": "https://unsplash.com/photos/j4PaE7E2_Ws"
+    },
+    {
+      "file": "studio-motion.jpg",
+      "author": "Maico Amorim",
+      "source": "https://unsplash.com/photos/SJWPKMb9u-k"
+    },
+    {
+      "file": "studio-explainer.jpg",
+      "author": "Jennifer Trovato",
+      "source": "https://unsplash.com/photos/baRYCsjO6z4"
+    },
+    {
+      "file": "studio-silent.jpg",
+      "author": "Kamesh Vedula",
+      "source": "https://unsplash.com/photos/ISL7czxIP-k"
+    },
+    {
+      "file": "auth-1.jpg",
+      "author": "Christopher Campbell",
+      "source": "https://unsplash.com/photos/CMWRIzyMKZk"
+    },
+    {
+      "file": "auth-2.jpg",
+      "author": "L\u00e9a Dubedout",
+      "source": "https://unsplash.com/photos/N6STB5KbRUU"
+    },
+    {
+      "file": "auth-3.jpg",
+      "author": "Nicola Perantoni",
+      "source": "https://unsplash.com/photos/irUQaBK3ydI"
+    },
+    {
+      "file": "empty-1.jpg",
+      "author": "Thom",
+      "source": "https://unsplash.com/photos/Zdcq3iKly6g"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+# ALVIOn runtime dependencies.
+# Python 3.9+ (the pinned versions below are the newest that support 3.9).
+anthropic>=0.125.0
+fastapi>=0.128.0
+uvicorn[standard]>=0.39.0
+python-multipart>=0.0.9
+cryptography>=43,<44
+httpx>=0.28.0
+PyYAML>=6.0
+imageio-ffmpeg>=0.6.0
+numpy>=1.26
+av>=15.0
+Pillow>=11.0
